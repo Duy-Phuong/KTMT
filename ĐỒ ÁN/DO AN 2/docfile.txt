@@ -1,0 +1,74 @@
+		#la	$a0, str1		# int str1
+		#li	$v0, 4			#
+		#syscall				#
+
+		#li	$v0, 5			# nhap kich thuoc mang n
+		#syscall				# load vao $v0
+
+
+		#move	$s2, $v0		# $s2=n
+
+# Open file for reading
+
+li   $v0, 13       # system call for open file
+la   $a0, fin      # input file name
+li   $a1, 0        # flag for reading
+li   $a2, 0        # mode is ignored
+syscall            # open a file 
+move $s6, $v0      # save the file descriptor 
+
+# reading from file just opened
+
+li   $v0, 14       # system call for reading from file
+move $a0, $s6      # file descriptor 
+la   $a1, buffer1   # address of buffer from which to read
+li   $a2,  10000  # hardcoded buffer length
+syscall            # read from file
+
+li      $t5, 0# chieu dai chuoi**
+strLen1:                 #getting length of string
+lb      $t0, buffer1($t5)   #loading value
+add     $t5, $t5, 1
+bne     $t0, $zero, strLen1
+
+li $t6, -1
+li $t7, -1
+li $t8, 0
+Loop1:
+beq $t6, $t5, exit0#neu het chuoi
+addi     $t6, $t6, 1     #this statement is now before the 'load address'
+la      $t0, buffer1($t6) 
+lb      $a0, ($t0)
+
+blt $a0, 48, exit10
+bgt $a0, 57, exit10
+
+addi $t8, $t8, 1
+lb      $a0, ($t0)#lay a0 la dia chi cua chuoi
+addi $t7, $t7, 1
+sb $a0, chuoi($t7)
+j Loop1
+
+
+exit0:
+j continue
+####
+exit10:
+beq $t8, $0, Loop1#neu k doc dk ki tu khac so
+li $t7, -1
+la $a0, chuoi
+move $a1, $t8
+jal atoi
+# print the return value from ATOI
+move $s2, $v0
+li $t8, 0
+j continue
+
+
+continue:
+# Close the file 
+
+li   $v0, 16       # system call for close file
+move $a0, $s6      # file descriptor to close
+syscall            # close file
+
